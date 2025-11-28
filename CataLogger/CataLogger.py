@@ -256,6 +256,8 @@ def apply_language_to_prefix(prefix: str, lang_code: str) -> str:
 # -------------------------------------------------
 # STREAMLIT UI
 # -------------------------------------------------
+st.set_page_config(page_title="CataLogger", page_icon="📦", layout="centered")
+
 st.title("Cata:green[Logger] 📦")
 st.subheader("iNUX Resource YAML Generator ➤ Register Interactive Documents for the iNUX Catalog", divider="rainbow")
 
