@@ -83,6 +83,7 @@ def slugify(text: str) -> str:
     text = re.sub(r"[^a-z0-9]+", "-", text)
     return text.strip("-") or "unknown"
 
+
 def strip_numeric_prefix(label: str) -> str:
     """
     Removes leading numeric prefixes like '01 ' or '03.2 ' from catalog labels.
@@ -93,14 +94,18 @@ def strip_numeric_prefix(label: str) -> str:
         return parts[1]
     return label
 
+
 def get_categories():
     return sorted(CATALOG.keys())
+
 
 def get_subcategories(category: str):
     return sorted(CATALOG[category]["sub"].keys())
 
+
 def get_subsubcategories(category: str, subcategory: str):
     return sorted(CATALOG[category]["sub"][subcategory]["sub"].keys())
+
 
 def resolve_page(category: str, subcategory_choice: str, subsub_choice: str):
     """
@@ -123,6 +128,7 @@ def resolve_page(category: str, subcategory_choice: str, subsub_choice: str):
     subsub_entry = sub_entry["sub"][subsub_choice]
     return subsub_entry["page_id"], subsub_choice
 
+
 def build_yaml_text(
     topic_title: str,
     resource_title: str,
@@ -135,6 +141,14 @@ def build_yaml_text(
     fit_for_list,
     author: str,
     author_institute: str,
+    multipage_app: bool,
+    num_pages: int,
+    interactive_plots: bool,
+    num_interactive_plots: int,
+    assessments_included: bool,
+    num_assessment_questions: int,
+    videos_included: bool,
+    num_videos: int,
 ):
     """
     Build YAML as a formatted string matching the template + comments.
@@ -165,6 +179,12 @@ def build_yaml_text(
     # author institute: allow empty but still emit line
     author_institute_value = author_institute.strip() or "TO_BE_FILLED_BY_COURSE_MANAGER"
 
+    # booleans as lowercase YAML
+    multipage_str = str(multipage_app).lower()
+    interactive_plots_str = str(interactive_plots).lower()
+    assessments_str = str(assessments_included).lower()
+    videos_str = str(videos_included).lower()
+
     yaml_str = f"""# --- RESOURCE IDENTIFICATION AND TOPIC MAPPING ---
 # item_id: A unique, simple slug for this item (e.g., aquifer_test_1). 
 
@@ -180,6 +200,14 @@ date_released: TO_BE_FILLED_BY_COURSE_MANAGER               # Release date in YY
 # --- CONTENT AND METADATA ---
 {desc_block.rstrip()}
 keywords: {keywords_inline}
+multipage_app: {multipage_str}
+num_pages: {num_pages}
+interactive_plots: {interactive_plots_str}
+num_interactive_plots: {num_interactive_plots}
+assessments_included: {assessments_str}
+num_assessment_questions: {num_assessment_questions}
+videos_included: {videos_str}
+num_videos: {num_videos}
 
 # --- EDUCATIONAL FIT ---
 time_required: {time_required}             # Estimated time for a student to complete the activity (e.g., 30 minutes, 1.5 hours).
@@ -193,6 +221,7 @@ references: []                            # List any published papers, DOIs, or 
 # image_url: Optional path to a screenshot for the catalog page (e.g., /assets/images/resources/flow_tool_screenshot.png)
 """
     return yaml_str
+
 
 def apply_language_to_prefix(prefix: str, lang_code: str) -> str:
     """
@@ -222,6 +251,7 @@ def apply_language_to_prefix(prefix: str, lang_code: str) -> str:
                 return f"{existing_lang}_{lang_code}"
     else:
         return f"{prefix}_{lang_code}"
+
 
 # -------------------------------------------------
 # STREAMLIT UI
@@ -352,24 +382,79 @@ else:
 # --------- 2. RESOURCE DETAILS ---------------------------------------
 st.header("2️⃣ Describe your submission")
 
-with st.form("resource_form"):
-    # Title
-    resource_title = st.text_input("Title of the resource", "")
+# Title (outside form is fine)
+resource_title = st.text_input("Title of the resource", "")
 
-    # Submission type
-    submission_type = st.selectbox(
-        "Submission type",
-        [
-            "Streamlit app",
-            "Jupyter Notebook",
-#            "Video tutorial",
-#            "Assessment test",
-#            "Practice exercise",
-#            "Supplementary material for an existing resource",
-            "Other",
-        ],
+# Submission type – OUTSIDE form so it updates immediately
+submission_type = st.selectbox(
+    "Submission type",
+    [
+        "Streamlit app",
+        "Jupyter Notebook",
+        "Other",
+    ],
+)
+
+# ----- Streamlit-specific questions (conditional, directly under type) -----
+multipage_app = False
+num_pages = 0
+interactive_plots = False
+num_interactive_plots = 0
+assessments_included = False
+num_assessment_questions = 0
+videos_included = False
+num_videos = 0
+
+if submission_type == "Streamlit app":
+    st.markdown("#### Additional details for Streamlit app")
+
+    multipage_app = st.checkbox("Is this a multipage Streamlit app?", value=False)
+    if multipage_app:
+        num_pages = st.number_input(
+            "Approximate number of pages",
+            min_value=1,
+            step=1,
+            value=2,
+        )
+
+    interactive_plots = st.checkbox(
+        "Does the app contain interactive plots?",
+        value=False,
     )
+    if interactive_plots:
+        num_interactive_plots = st.number_input(
+            "Approximate number of interactive plots",
+            min_value=1,
+            step=1,
+            value=1,
+        )
 
+    assessments_included = st.checkbox(
+        "Does the app include assessments (questions)?",
+        value=False,
+    )
+    if assessments_included:
+        num_assessment_questions = st.number_input(
+            "Approximate number of assessment questions",
+            min_value=1,
+            step=1,
+            value=1,
+        )
+
+    videos_included = st.checkbox(
+        "Does the app include embedded video tutorials?",
+        value=False,
+    )
+    if videos_included:
+        num_videos = st.number_input(
+            "Approximate number of videos",
+            min_value=1,
+            step=1,
+            value=1,
+        )
+
+# ---- Rest of the inputs in a form (to keep preview + submit flow) ----
+with st.form("resource_form"):
     # Access URL
     access_url = st.text_input(
         "Access link (URL)",
@@ -377,19 +462,20 @@ with st.form("resource_form"):
     )
 
     # Estimated time required
-    time_presets = ["5-15 min", "15-30 minutes", "30-45 minutes", "1 hour", "1.5 hours", "2 hours", "Custom"]
+    time_presets = [
+        "5–15 min",
+        "15–30 minutes",
+        "30–45 minutes",
+        "1 hour",
+        "1.5 hours",
+        "2 hours",
+        "Custom",
+    ]
     time_choice = st.selectbox("Estimated time required", time_presets, index=1)
     if time_choice == "Custom":
         time_required = st.text_input("Custom time description", "")
     else:
         time_required = time_choice
-#TODO: IF STREAMLIT ASK FOR MULTIPAGE
-#TODO: ASK FOR ELEMENTS OF THE INTERACTIVE DOCUMENT
-#      IF interactive_plot THEN ask for numbers
-#      IF ASSESSMENTS THEN ask for numbers
-#      IF LAB/FIELD VIDEO THEN ask for numbers
-#      IF SCREENCAST THEN ask for numbers
-#      I WOULD ORGANIZE THIS AS COLUMN (2) WITH COLUMN(1) TOGGLE AND IF TOGGLE TRUE THEN COLUMN(2) IS THE NUMBER INPUT
 
     # Short description
     description_short = st.text_area(
@@ -485,14 +571,20 @@ else:
 
     elif new_subsub_existing_mode:
         # C. Existing category + existing subcategory, new sub-sub
-        page_id, topic_title = resolve_page(category_name, subcategory_choice, "(Attach to subcategory)")
-        sub_prefix = CATALOG[category_name]["sub"][subcategory_choice]["page_id"][:4]  # e.g. "050400_en" -> "0504"
+        page_id, topic_title = resolve_page(
+            category_name, subcategory_choice, "(Attach to subcategory)"
+        )
+        sub_prefix = CATALOG[category_name]["sub"][subcategory_choice]["page_id"][
+            :4
+        ]  # e.g. "050400_en" -> "0504"
         parts = [sub_prefix, slugify(new_subsub_under_existing or "new-sub-subcategory")]
         hierarchy_base = "_".join(parts)
 
     else:
         # A. All existing (category / subcategory / sub-subcategory)
-        page_id, topic_title = resolve_page(category_name, subcategory_choice, subsub_choice)
+        page_id, topic_title = resolve_page(
+            category_name, subcategory_choice, subsub_choice
+        )
         hierarchy_base = page_id  # e.g. "050400_en"
 
 yaml_text = build_yaml_text(
@@ -507,6 +599,20 @@ yaml_text = build_yaml_text(
     fit_for_list=fit_for,
     author=author,
     author_institute=author_institute,
+    multipage_app=multipage_app if submission_type == "Streamlit app" else False,
+    num_pages=int(num_pages) if submission_type == "Streamlit app" else 0,
+    interactive_plots=interactive_plots if submission_type == "Streamlit app" else False,
+    num_interactive_plots=int(num_interactive_plots)
+    if submission_type == "Streamlit app"
+    else 0,
+    assessments_included=assessments_included
+    if submission_type == "Streamlit app"
+    else False,
+    num_assessment_questions=int(num_assessment_questions)
+    if submission_type == "Streamlit app"
+    else 0,
+    videos_included=videos_included if submission_type == "Streamlit app" else False,
+    num_videos=int(num_videos) if submission_type == "Streamlit app" else 0,
 )
 
 # Apply language logic to hierarchy_base
@@ -522,43 +628,34 @@ filename = f"{base_name}.yaml"
 if show_preview:
     st.header("3️⃣ Preview your entry")
 
-    col1, col2 = st.columns(2)
-
-    # ----- Compute display labels for catalog location (proposed) -----
+    # --- compute display labels for catalog location (proposed) ---
     if new_category_mode:
-        # Completely new category path
-        if new_category_name.strip():
-            display_category = f"{new_category_name} (proposed)"
-        else:
-            display_category = "—"
-
+        display_category = (
+            f"{new_category_name} (proposed)" if new_category_name.strip() else "—"
+        )
         if new_subcategory_under_newcat.strip():
             display_subcategory = f"{new_subcategory_under_newcat} (proposed)"
         else:
             display_subcategory = "—"
-
         if new_subsub_under_newcat.strip():
             display_subsub = f"{new_subsub_under_newcat} (proposed)"
         else:
             display_subsub = "—"
     else:
-        # Existing category
         display_category = category_name
-
-        # Subcategory
         if new_subcategory_mode and new_subcategory_name.strip():
             display_subcategory = f"{new_subcategory_name} (proposed)"
         else:
             display_subcategory = subcategory_choice
 
-        # Sub-subcategory
         if new_subsub_existing_mode and new_subsub_under_existing.strip():
             display_subsub = f"{new_subsub_under_existing} (proposed)"
         elif new_subsub_under_newsub.strip():
-            # case: new subcategory + new sub-subcategory
             display_subsub = f"{new_subsub_under_newsub} (proposed)"
         else:
             display_subsub = subsub_choice or "—"
+
+    col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("#### Catalog location")
@@ -580,6 +677,21 @@ if show_preview:
 - **Estimated time:** {time_required or '—'}
 """
         )
+
+        if submission_type == "Streamlit app":
+            st.markdown("#### Streamlit app details")
+            st.markdown(
+                f"""
+- **Multipage app:** {"yes" if multipage_app else "no"}  
+- **Number of pages:** {int(num_pages) if multipage_app else "—"}  
+- **Interactive plots:** {"yes" if interactive_plots else "no"}  
+- **Number of interactive plots:** {int(num_interactive_plots) if interactive_plots else "—"}  
+- **Assessments included:** {"yes" if assessments_included else "no"}  
+- **Number of assessment questions:** {int(num_assessment_questions) if assessments_included else "—"}  
+- **Videos included:** {"yes" if videos_included else "no"}  
+- **Number of videos:** {int(num_videos) if videos_included else "—"}
+"""
+            )
 
         st.markdown("#### Educational fit")
         pretty_fit_for = ", ".join(fit_for) if fit_for else "—"
