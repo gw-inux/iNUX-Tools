@@ -257,7 +257,7 @@ def apply_language_to_prefix(prefix: str, lang_code: str) -> str:
 # STREAMLIT UI
 # -------------------------------------------------
 st.title("📦 CataLogger ")
-st.subheader("iNUX Resource YAML Generator - Register Interactive Documents for the iNUX catalog", divider="rainbow")
+st.subheader("iNUX Resource YAML Generator - Register Interactive Documents for the iNUX Catalog", divider="rainbow")
 
 st.markdown(
     """
@@ -442,7 +442,7 @@ if submission_type == "Streamlit app":
         )
 
     videos_included = st.checkbox(
-        "Does the app include embedded video tutorials?",
+        "Does the app include embedded video / tutorials?",
         value=False,
     )
     if videos_included:
@@ -511,10 +511,14 @@ with st.form("resource_form"):
     )
 
     # Author
-    author = st.text_input("Your name (author)", "")
+    # ToDo: We should account for several authors; for the moment, a dropdown list will make our life much easier (same principle as categories)
+    # We need to account also the different institutions. The optimum solution would be to associate known authors with their institution. Then, the next field for institution is only required for new authors. In the final file (PDF/Catalog) we can write authors/institutions like in all our Apps
+    
+    author = st.text_input("Name of the author/co-authors", "")
     author_institute = st.text_input("Affiliation (optional)", "")
 
     # Optional figure upload (multiple files allowed)
+    # ToDo can we implement an option to take a screenshot/part of the screen? Or use copy-paste? That would make our life easier.
     uploaded_figures = st.file_uploader(
         "Optional figures (PNG/JPG) to bundle with the YAML",
         type=["png", "jpg", "jpeg"],
@@ -530,11 +534,13 @@ with st.form("resource_form"):
             help="If checked, a summary of your entry will appear before the download is created.",
         )
     with col_btn2:
-        submitted = st.form_submit_button("Generate YAML")
+        submitted = st.form_submit_button("Submit/Generate YAML")
 
     if submitted:
         st.session_state["form_done"] = True
         st.session_state["ready_for_download"] = not show_preview
+
+# TODO We need an option for restart/reset
 
 if not st.session_state["form_done"]:
     st.stop()
