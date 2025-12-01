@@ -949,7 +949,7 @@ else:
     pdf_bytes = yaml_to_pdf_bytes(yaml_text)
 
     st.download_button(
-        label=f"⬇️ Download YAML as {filename.replace(".yaml", ".pdf")}",
+        label=f"⬇️ Download YAML as {filename.replace('.yaml', '.pdf')}",
         data=pdf_bytes,
         file_name=filename.replace(".yaml", ".pdf"),
         mime="application/pdf",
