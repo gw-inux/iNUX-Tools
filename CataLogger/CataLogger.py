@@ -139,8 +139,7 @@ def build_yaml_text(
     time_required: str,
     prerequisites_text: str,
     fit_for_list,
-    author: str,
-    author_institute: str,
+    authors,                     # <-- list of dicts: {name, affiliation}
     multipage_app: bool,
     num_pages: int,
     interactive_plots: bool,
@@ -176,14 +175,30 @@ def build_yaml_text(
     for line in desc_lines:
         desc_block += f"  {line.rstrip()}\n"
 
-    # author institute: allow empty but still emit line
-    author_institute_value = author_institute.strip() or "TO_BE_FILLED_BY_COURSE_MANAGER"
-
     # booleans as lowercase YAML
     multipage_str = str(multipage_app).lower()
     interactive_plots_str = str(interactive_plots).lower()
     assessments_str = str(assessments_included).lower()
     videos_str = str(videos_included).lower()
+
+    # authors block
+    authors_clean = [
+        {
+            "name": (a.get("name") or "").strip(),
+            "affiliation": (a.get("affiliation") or "").strip()
+            or "TO_BE_FILLED_BY_COURSE_MANAGER",
+        }
+        for a in authors
+        if (a.get("name") or "").strip()
+    ]
+
+    if authors_clean:
+        authors_block = "authors:\n"
+        for a in authors_clean:
+            authors_block += f"  - name: {a['name']}\n"
+            authors_block += f"    affiliation: {a['affiliation']}\n"
+    else:
+        authors_block = "authors: []\n"
 
     yaml_str = f"""# --- RESOURCE IDENTIFICATION AND TOPIC MAPPING ---
 # item_id: A unique, simple slug for this item (e.g., aquifer_test_1). 
@@ -215,8 +230,7 @@ prerequisites: {prerequisites_value}       # Required prior knowledge (e.g., Dar
 {fit_for_block.rstrip()}
 
 # --- AUTHOR AND REFERENCE ---
-author: {author}
-author_institute: {author_institute_value}
+{authors_block.rstrip()}
 references: []                            # List any published papers, DOIs, or source materials related to this resource.
 # image_url: Optional path to a screenshot for the catalog page (e.g., /assets/images/resources/flow_tool_screenshot.png)
 """
@@ -274,6 +288,9 @@ if "form_done" not in st.session_state:
     st.session_state["form_done"] = False
 if "ready_for_download" not in st.session_state:
     st.session_state["ready_for_download"] = False
+
+if "authors_count" not in st.session_state:
+    st.session_state["authors_count"] = 1   # start with 1 author by default
 
 # -------------------------------------------------
 # LANGUAGE DROPDOWN
@@ -455,6 +472,45 @@ if submission_type == "Streamlit app":
             value=1,
         )
 
+
+
+# --------- AUTHORS (MULTI-AUTHOR SUPPORT) -----------------------------
+st.subheader("Author(s)")
+
+# Render fields FIRST — but we will rerun if buttons clicked
+authors = []
+for i in range(st.session_state["authors_count"]):
+    idx = i + 1
+    name = st.text_input(f"Author {idx} name", key=f"author_name_{i}")
+    affiliation = st.text_input(
+        f"Author {idx} affiliation",
+        key=f"author_aff_{i}",
+        help="Institute / organisation (can be the same for multiple authors).",
+    )
+    authors.append({"name": name, "affiliation": affiliation})
+
+
+# -------- BUTTONS BELOW --------
+col_add, col_remove, spacer1, spacer2 = st.columns([1, 1, 1, 1])
+
+with col_add:
+    if st.button("➕ Add author", help="Click to insert another author row"):
+        if st.session_state["authors_count"] < 10:
+            st.session_state["authors_count"] += 1
+            st.rerun()      # <-- instantly rerun so new author appears
+
+with col_remove:
+    remove_disabled = st.session_state["authors_count"] <= 1
+    if st.button("➖ Remove author", disabled=remove_disabled,
+                 help="Remove the last author row"):
+        if st.session_state["authors_count"] > 1:
+            st.session_state["authors_count"] -= 1
+            last_idx = st.session_state["authors_count"]
+            st.session_state.pop(f"author_name_{last_idx}", None)
+            st.session_state.pop(f"author_aff_{last_idx}", None)
+            st.rerun()      # <-- instantly rerun so last disappears
+
+
 # ---- Rest of the inputs in a form (to keep preview + submit flow) ----
 with st.form("resource_form"):
     # Access URL
@@ -511,13 +567,6 @@ with st.form("resource_form"):
         "",
         help="Example: Darcy's law, Python basics",
     )
-
-    # Author
-    # ToDo: We should account for several authors; for the moment, a dropdown list will make our life much easier (same principle as categories)
-    # We need to account also the different institutions. The optimum solution would be to associate known authors with their institution. Then, the next field for institution is only required for new authors. In the final file (PDF/Catalog) we can write authors/institutions like in all our Apps
-    
-    author = st.text_input("Name of the author/co-authors", "")
-    author_institute = st.text_input("Affiliation (optional)", "")
 
     # Optional figure upload (multiple files allowed)
     # ToDo can we implement an option to take a screenshot/part of the screen? Or use copy-paste? That would make our life easier.
@@ -605,8 +654,7 @@ yaml_text = build_yaml_text(
     time_required=time_required,
     prerequisites_text=prereq_text,
     fit_for_list=fit_for,
-    author=author,
-    author_institute=author_institute,
+    authors=authors,
     multipage_app=multipage_app if submission_type == "Streamlit app" else False,
     num_pages=int(num_pages) if submission_type == "Streamlit app" else 0,
     interactive_plots=interactive_plots if submission_type == "Streamlit app" else False,
@@ -627,7 +675,9 @@ yaml_text = build_yaml_text(
 prefix_with_lang = apply_language_to_prefix(hierarchy_base, lang_code)
 
 # Final filename
-author_slug = slugify(author)
+# Use first author as slug, fallback to "unknown"
+first_author_name = next((a["name"] for a in authors if a["name"].strip()), "")
+author_slug = slugify(first_author_name or "unknown")
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 base_name = f"{prefix_with_lang}_{author_slug}_{timestamp}"
 filename = f"{base_name}.yaml"
@@ -721,13 +771,16 @@ if show_preview:
         pretty_keywords = ", ".join(keywords_list) if keywords_list else "—"
         st.markdown(f"{pretty_keywords}")
 
-        st.markdown("#### Author")
-        st.markdown(
-            f"""
-- **Name:** {author or '—'}  
-- **Affiliation:** {author_institute or '—'}
-"""
-        )
+        st.markdown("#### Authors")
+        if any((a["name"] or "").strip() for a in authors):
+            for a in authors:
+                if (a["name"] or "").strip():
+                    st.markdown(
+                        f"- **Name:** {a['name']}  \n"
+                        f"  **Affiliation:** {a['affiliation'] or '—'}"
+                    )
+        else:
+            st.markdown("—")
 
         if uploaded_figures:
             st.markdown("#### Figure preview")
