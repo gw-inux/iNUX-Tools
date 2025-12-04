@@ -42,52 +42,236 @@ LANGUAGE_OPTIONS = {
 CATALOG = {
     "01 Water Cycle": {
         "page_id": "010000_en",
-        "sub": {}
+        "sub": {
+            "01 Precipitation & Hydrometeorology": {
+                "page_id": "010100_en",
+                "sub": {}
+            },
+            "02 Evaporation, Transpiration & ET Processes": {
+                "page_id": "010200_en",
+                "sub": {}
+            },
+            "03 Surface Runoff Formation": {
+                "page_id": "010300_en",
+                "sub": {}
+            },
+            "04 Soil Water in the Hydrological Cycle": {
+                "page_id": "010400_en",
+                "sub": {}
+            },
+            "05 Groundwater Recharge (process-based)": {
+                "page_id": "010500_en",
+                "sub": {}
+            },
+        },
     },
     "02 Basic Hydrology": {
         "page_id": "020000_en",
-        "sub": {}
+        "sub": {
+            "01 Catchment Hydrology & Runoff Generation": {
+                "page_id": "020100_en",
+                "sub": {}
+            },
+            "02 Hydrographs & Flow Regimes": {
+                "page_id": "020200_en",
+                "sub": {}
+            },
+            "03 Water Balance & Hydrologic Budget": {
+                "page_id": "020300_en",
+                "sub": {}
+            },
+            "04 Surface Water – Groundwater Interaction": {
+                "page_id": "020400_en",
+                "sub": {}
+            },
+            "05 Hydrological Measurement & Instrumentation": {
+                "page_id": "020500_en",
+                "sub": {}
+            },
+        },
     },
     "03 Soil Physics": {
         "page_id": "030000_en",
         "sub": {
-            "01 Soil Properties": {"page_id": "030100_en", "sub": {}},
-            "02 Soil moisture retention": {"page_id": "030200_en", "sub": {}},
-            "03 Unsaturated Flow": {"page_id": "030300_en", "sub": {}},
+            "01 Soil Properties": {
+                "page_id": "030100_en",
+                "sub": {}
+            },
+            "02 Soil Water Retention": {
+                "page_id": "030200_en",
+                "sub": {}
+            },
+            "03 Unsaturated Flow": {
+                "page_id": "030300_en",
+                "sub": {}
+            },
+            "04 Hydraulic Conductivity Functions": {
+                "page_id": "030400_en",
+                "sub": {}
+            },
+            "05 Infiltration (Horton, Green–Ampt, Philip)": {
+                "page_id": "030500_en",
+                "sub": {}
+            },
         },
     },
     "04 Basic Hydrogeology": {
         "page_id": "040000_en",
         "sub": {
-            "01 Hydrogeological concepts": {"page_id": "040100_en", "sub": {}},
-            "02 Hydrogeological properties": {"page_id": "040200_en", "sub": {}},
-            "03 Steady Groundwater movement": {"page_id": "040300_en", "sub": {}},
-            "04 Transient Groundwater Movement": {"page_id": "040400_en", "sub": {}},
-            "05 Flow to wells": {"page_id": "040500_en", "sub": {}},
+            "01 Hydrogeological Concepts & Aquifer Types": {
+                "page_id": "040100_en",
+                "sub": {}
+            },
+            "02 Hydrogeological Properties": {
+                "page_id": "040200_en",
+                "sub": {}
+            },
+            "03 Steady Groundwater Flow": {
+                "page_id": "040300_en",
+                "sub": {}
+            },
+            "04 Transient Groundwater Flow": {
+                "page_id": "040400_en",
+                "sub": {}
+            },
+            "05 Flow to Wells": {
+                "page_id": "040500_en",
+                "sub": {}
+            },
+            "06 Regional Groundwater Flow Systems": {
+                "page_id": "040600_en",
+                "sub": {}
+            },
+            "07 Recharge & Discharge Areas (conceptual)": {
+                "page_id": "040700_en",
+                "sub": {}
+            },
+            "08 Conceptual Hydrogeological Models": {
+                "page_id": "040800_en",
+                "sub": {}
+            },
         },
     },
     "05 Applied Hydrogeology": {
         "page_id": "050000_en",
         "sub": {
-            "01 Groundwater Management": {"page_id": "050100_en", "sub": {}},
-            "02 Karst Hydrology": {"page_id": "050200_en", "sub": {}},
-            "03 Aquifer Testing": {"page_id": "050300_en", "sub": {}},
-            "04 Conservative Transport": {"page_id": "050400_en", "sub": {}},
-            "05 Reactive Transport": {"page_id": "050500_en", "sub": {}},
-            "06 Freshwater-Saltwater Interaction": {"page_id": "050600_en", "sub": {}},
+            "01 Groundwater Management": {
+                "page_id": "050100_en",
+                "sub": {}
+            },
+            "02 Aquifer Testing": {
+                "page_id": "050200_en",
+                "sub": {}
+            },
+            "03 Groundwater in Water Supply (well fields, collector wells, superposition)": {
+                "page_id": "050300_en",
+                "sub": {}
+            },
+            "04 Karst Hydrogeology": {
+                "page_id": "050400_en",
+                "sub": {}
+            },
+            "05 Freshwater–Saltwater Interaction": {
+                "page_id": "050500_en",
+                "sub": {}
+            },
+            "06 Conservative Solute Transport": {
+                "page_id": "050600_en",
+                "sub": {}
+            },
+            "07 Reactive Transport": {
+                "page_id": "050700_en",
+                "sub": {}
+            },
+            "08 Groundwater Contamination & Remediation": {
+                "page_id": "050800_en",
+                "sub": {}
+            },
+            "09 Managed Aquifer Recharge (MAR)": {
+                "page_id": "050900_en",
+                "sub": {}
+            },
+            "10 Groundwater–Surface Water Ecology & Dependent Ecosystems": {
+                "page_id": "051000_en",
+                "sub": {}
+            },
+            "11 Climate Change Impacts & Groundwater Sustainability": {
+                "page_id": "051100_en",
+                "sub": {}
+            },
+            "12 Groundwater Chemistry & Geochemistry": {
+                "page_id": "051200_en",
+                "sub": {}
+            },
+            "13 Environmental Tracers & Isotope Hydrogeology": {
+                "page_id": "051300_en",
+                "sub": {}
+            },
+            "14 Groundwater Heat Flow & Geothermal Systems": {
+                "page_id": "051400_en",
+                "sub": {}
+            },
+            "15 Field & Subsurface Investigation Methods (drilling, logging, geophysics)": {
+                "page_id": "051500_en",
+                "sub": {}
+            },
         },
     },
-    "06 Ground Water Modelling": {
+    "06 Groundwater Modelling": {
         "page_id": "060000_en",
         "sub": {
-            "01 Concepts": {"page_id": "060100_en", "sub": {}},
-            "02 Numerical Schemes": {"page_id": "060200_en", "sub": {}},
-            "03 Flow Modelling": {"page_id": "060300_en", "sub": {}},
-            "04 Transport Modelling": {"page_id": "060400_en", "sub": {}},
-            "05 Coupled Models": {"page_id": "060500_en", "sub": {}},
+            "01 Conceptual Model Development": {
+                "page_id": "060100_en",
+                "sub": {}
+            },
+            "02 Numerical Schemes (FD, FE, FV)": {
+                "page_id": "060200_en",
+                "sub": {}
+            },
+            "03 Flow Modelling": {
+                "page_id": "060300_en",
+                "sub": {}
+            },
+            "04 Transport Modelling": {
+                "page_id": "060400_en",
+                "sub": {}
+            },
+            "05 Coupled Models (density, heat, CFP)": {
+                "page_id": "060500_en",
+                "sub": {}
+            },
+            "06 Parameter Estimation & Calibration": {
+                "page_id": "060600_en",
+                "sub": {}
+            },
+            "07 Sensitivity & Uncertainty Analysis": {
+                "page_id": "060700_en",
+                "sub": {}
+            },
+            "08 Model Validation & Verification": {
+                "page_id": "060800_en",
+                "sub": {}
+            },
+            "09 MODFLOW Packages & Tools": {
+                "page_id": "060900_en",
+                "sub": {}
+            },
+            "10 Data-Driven & Machine Learning Approaches": {
+                "page_id": "061000_en",
+                "sub": {}
+            },
+            "11 Scenario Analysis & Decision-Support Modelling": {
+                "page_id": "061100_en",
+                "sub": {}
+            },
+            "12 Geostatistics & Spatial Variability in Modelling": {
+                "page_id": "061200_en",
+                "sub": {}
+            },
         },
     },
 }
+
 
 NEW_CAT_OPTION = "➕ Define new category"
 NEW_SUBCAT_OPTION = "➕ Define new subcategory"
@@ -168,10 +352,25 @@ def build_yaml_text(
     videos_included: bool,
     num_videos: int,
     figures_meta=None,           # list of dicts: {id, original_filename, type, caption}
+    references_list=None,        # NEW
+    catalog_category=None,       # NEW: for YAML header
+    catalog_subcategory=None,    # NEW
+    catalog_subsubcategory=None, # NEW
 ):
     """
     Build YAML as a formatted string matching the template + comments.
     """
+    # -------- catalog location header (ALWAYS AT TOP) --------
+    catalog_category = catalog_category or "—"
+    catalog_subcategory = catalog_subcategory or "—"
+    catalog_subsubcategory = catalog_subsubcategory or "—"
+
+    catalog_location_yaml = (
+        f'catalog_category: "{catalog_category}"\n'
+        f'catalog_subcategory: "{catalog_subcategory}"\n'
+        f'catalog_subsubcategory: "{catalog_subsubcategory}"\n\n'
+    )
+
     # keywords inline list: [a, b, c] or [] if empty
     if keywords_list:
         keywords_inline = "[{}]".format(", ".join(keywords_list))
@@ -221,7 +420,16 @@ def build_yaml_text(
     else:
         authors_block = "authors: []\n"
 
-    yaml_str = f"""# --- RESOURCE IDENTIFICATION AND TOPIC MAPPING ---
+    # references block
+    references_list = references_list or []
+    if references_list:
+        refs_block = "references:\n"
+        for r in references_list:
+            refs_block += f"  - {r}\n"
+    else:
+        refs_block = "references: []\n"
+
+    yaml_str = catalog_location_yaml + f"""# --- RESOURCE IDENTIFICATION AND TOPIC MAPPING ---
 # item_id: A unique, simple slug for this item (e.g., aquifer_test_1). 
 
 item_id: TO_BE_FILLED_BY_COURSE_MANAGER
@@ -252,7 +460,7 @@ prerequisites: {prerequisites_value}       # Required prior knowledge (e.g., Dar
 
 # --- AUTHOR AND REFERENCE ---
 {authors_block.rstrip()}
-references: []                            # List any published papers, DOIs, or source materials related to this resource.
+{refs_block.rstrip()}                            # List any published papers, DOIs, or source materials related to this resource.
 # image_url: Optional path to a screenshot for the catalog page (e.g., /assets/images/resources/flow_tool_screenshot.png)
 """
 
@@ -265,6 +473,7 @@ references: []                            # List any published papers, DOIs, or 
             orig = fig.get("original_filename", "")
             ftype = (fig.get("type") or "").strip()
             fcap = (fig.get("caption") or "").strip()
+            is_cover = fig.get("is_cover")  # NEW: cover flag from the app
 
             yaml_str += f"  - id: {fid}\n"
             if orig:
@@ -273,10 +482,13 @@ references: []                            # List any published papers, DOIs, or 
                 yaml_str += f"    type: {ftype}\n"
             if fcap:
                 yaml_str += f"    caption: {fcap}\n"
+            if is_cover:                     # NEW: only write if True
+                yaml_str += "    is_cover: true\n"
     else:
         yaml_str += "\nfigures: []\n"
 
     return yaml_str
+
 
 
 def apply_language_to_prefix(prefix: str, lang_code: str) -> str:
@@ -403,6 +615,7 @@ def yaml_to_pdf_bytes(yaml_text: str, language_label: str, uploaded_figures=None
     story.append(Paragraph("Resource description sheet", cover_subtitle_style))
 
     story.append(Image("FIGS/iNUX_wLogo.png", width=40*mm, height=40*mm))
+    ##story.append(Image("assets/images/inux_logo.png", width=40*mm, height=40*mm))
 
     # NOTE: Here you could later add an Image() for the iNUX logo if you have a file path.
     # e.g. story.append(Image("path/to/inux_logo.png", width=40*mm, height=40*mm))
@@ -487,17 +700,43 @@ def yaml_to_pdf_bytes(yaml_text: str, language_label: str, uploaded_figures=None
     # -------- 3. TECHNICAL DETAILS --------
     story.append(Paragraph("3. Technical details", section_style))
 
-    tech_data = [
-        ["Multipage app", yn(data.get("multipage_app"))],
-        ["Number of pages", data.get("num_pages", "—")],
-        ["Interactive plots", yn(data.get("interactive_plots"))],
-        ["Number of interactive plots", data.get("num_interactive_plots", "—")],
-        ["Assessments included", yn(data.get("assessments_included"))],
-        ["Number of assessment questions", data.get("num_assessment_questions", "—")],
-        ["Videos included", yn(data.get("videos_included"))],
-        ["Number of videos", data.get("num_videos", "—")],
-    ]
+    tech_data = []
+
+    # Multipage app
+    multipage = data.get("multipage_app")
+    num_pages_val = data.get("num_pages")
+    if multipage:
+        # Only show if True, and combine with number of pages
+        pages_str = str(num_pages_val) if num_pages_val not in (None, "", 0) else "unknown"
+        tech_data.append(["Multipage app", f" approximately {pages_str} page(s)"])
+
+    # Interactive plots
+    interactive = data.get("interactive_plots")
+    num_ip_val = data.get("num_interactive_plots")
+    if interactive:
+        ip_str = str(num_ip_val) if num_ip_val not in (None, "", 0) else "unknown number of"
+        tech_data.append(["Interactive plots", f" {ip_str} interactive plot(s)"])
+
+    # Assessments included
+    assessments = data.get("assessments_included")
+    num_q_val = data.get("num_assessment_questions")
+    if assessments:
+        q_str = str(num_q_val) if num_q_val not in (None, "", 0) else "unknown number of"
+        tech_data.append(["Assessments", f" {q_str} question(s)"])
+
+    # Videos included
+    videos = data.get("videos_included")
+    num_vid_val = data.get("num_videos")
+    if videos:
+        v_str = str(num_vid_val) if num_vid_val not in (None, "", 0) else "unknown number of"
+        tech_data.append(["Videos", f"{v_str} video(s)"])
+
+    # Fallback row if nothing was reported
+    if not tech_data:
+        tech_data = [["No additional technical features reported", "—"]]
+
     tech_table = Table(tech_data, colWidths=[60 * mm, 100 * mm])
+
     tech_table.setStyle(
         TableStyle(
             [
@@ -971,9 +1210,17 @@ prereq_text = st.text_input(
     help="Example: Darcy's law, Python basics",
 )
 
+# References (one per line)
+references_text = st.text_area(
+    "References (one per line, optional)",
+    "",
+    help="Include DOIs, papers, datasets, or other materials related to this resource.",
+)
+
+
 # --------- 4. FIGURES UPLOAD + METADATA (AT THE END) -----------------
 uploaded_figures = st.file_uploader(
-    "Optional figures (PNG/JPG) to bundle with the YAML and include in the PDF. _You can upload several figures._",
+    "Optional figures (PNG/JPG) that will be bundled with the YAML and included in the PDF. You may upload multiple files.",
     type=["png", "jpg", "jpeg"],
     accept_multiple_files=True,
 )
@@ -1007,12 +1254,20 @@ if uploaded_figures:
             key=f"fig_caption_{i}",
         )
 
+         # NEW: let the user mark this image as the cover for the catalog page
+        fig_is_cover = st.checkbox(
+            f"Use image {i} as cover image for the catalog page",
+            key=f"fig_is_cover_{i}",
+            help="If multiple are checked, the generator will use the first one."
+        )
+
         figure_inputs.append(
             {
                 "id": i,
                 "original_filename": fig.name,
                 "type": fig_type if fig_type != "(not specified)" else "",
                 "caption": fig_caption.strip(),
+                 "is_cover": fig_is_cover,
             }
         )
 
@@ -1040,6 +1295,10 @@ if not st.session_state["form_done"]:
 # Process keywords for inline list
 keywords_list = [k.strip() for k in keywords_text.split(",") if k.strip()]
 
+# Process references (one per line)
+references_list = [r.strip() for r in references_text.splitlines() if r.strip()]
+
+
 # Decide topic_title and hierarchy_base (for filename)
 if new_category_mode:
     # D. Completely new category
@@ -1058,7 +1317,9 @@ else:
 
     if new_subcategory_mode:
         # B. Existing category, new subcategory (+ optional new sub-sub)
-        page_id, topic_title = resolve_page(category_name, "(Category homepage)", "")
+        # keep page_id resolution for potential future use; topic_title should be the new subcategory
+        page_id, _ = resolve_page(category_name, "(Category homepage)", "")
+        topic_title = (new_subcategory_name or "TO_BE_FILLED_BY_COURSE_MANAGER").strip()
         cat_prefix = CATALOG[category_name]["page_id"][:2]  # e.g. "050000_en" -> "05"
         parts = [cat_prefix, slugify(new_subcategory_name or "new-subcategory")]
         if new_subsub_under_newsub.strip():
@@ -1067,9 +1328,10 @@ else:
 
     elif new_subsub_existing_mode:
         # C. Existing category + existing subcategory, new sub-sub
-        page_id, topic_title = resolve_page(
+        page_id, _ = resolve_page(
             category_name, subcategory_choice, "(Attach to subcategory)"
         )
+        topic_title = (new_subsub_under_existing or "TO_BE_FILLED_BY_COURSE_MANAGER").strip()
         sub_prefix = CATALOG[category_name]["sub"][subcategory_choice]["page_id"][:4]
         parts = [sub_prefix, slugify(new_subsub_under_existing or "new-sub-subcategory")]
         hierarchy_base = "_".join(parts)
@@ -1080,6 +1342,35 @@ else:
             category_name, subcategory_choice, subsub_choice
         )
         hierarchy_base = page_id  # e.g. "050400_en"
+
+# --- compute catalog labels for YAML (same logic as preview) ---
+if new_category_mode:
+    catalog_category = (
+        f"{new_category_name} (proposed)" if (new_category_name or "").strip() else "—"
+    )
+    if (new_subcategory_under_newcat or "").strip():
+        catalog_subcategory = f"{new_subcategory_under_newcat} (proposed)"
+    else:
+        catalog_subcategory = "—"
+    if (new_subsub_under_newcat or "").strip():
+        catalog_subsubcategory = f"{new_subsub_under_newcat} (proposed)"
+    else:
+        catalog_subsubcategory = "—"
+else:
+    catalog_category = category_name
+    if new_subcategory_mode and (new_subcategory_name or "").strip():
+        catalog_subcategory = f"{new_subcategory_name} (proposed)"
+    else:
+        catalog_subcategory = subcategory_choice
+
+    if new_subsub_existing_mode and (new_subsub_under_existing or "").strip():
+        catalog_subsubcategory = f"{new_subsub_under_existing} (proposed)"
+    elif (new_subsub_under_newsub or "").strip():
+        catalog_subsubcategory = f"{new_subsub_under_newsub} (proposed)"
+    else:
+        catalog_subsubcategory = subsub_choice or "—"
+    
+    
 
 yaml_text = build_yaml_text(
     topic_title=strip_numeric_prefix(topic_title),
@@ -1098,16 +1389,18 @@ yaml_text = build_yaml_text(
     num_interactive_plots=int(num_interactive_plots)
     if submission_type == "Streamlit app"
     else 0,
-    assessments_included=assessments_included
-    if submission_type == "Streamlit app"
-    else False,
-    num_assessment_questions=int(num_assessment_questions)
-    if submission_type == "Streamlit app"
-    else 0,
+    assessments_included=assessments_included if submission_type == "Streamlit app" else False,
+    num_assessment_questions=int(num_assessment_questions) if submission_type == "Streamlit app" else 0,
     videos_included=videos_included if submission_type == "Streamlit app" else False,
     num_videos=int(num_videos) if submission_type == "Streamlit app" else 0,
     figures_meta=figure_inputs,
+    references_list=references_list,   # NEW
+    catalog_category=catalog_category,
+    catalog_subcategory=catalog_subcategory,
+    catalog_subsubcategory=catalog_subsubcategory,
 )
+
+
 
 # Apply language logic to hierarchy_base
 prefix_with_lang = apply_language_to_prefix(hierarchy_base, lang_code)
@@ -1218,6 +1511,15 @@ if st.session_state["show_preview_flag"]:
                     )
         else:
             st.markdown("—")
+
+        
+        st.markdown("#### References")
+        if references_list:
+            for ref in references_list:
+                st.markdown(f"- {ref}")
+        else:
+            st.markdown("—")
+
 
         if uploaded_figures:
             st.markdown("#### Figure preview (uploaded)")
