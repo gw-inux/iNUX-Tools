@@ -65,6 +65,7 @@ CATALOG = {
             },
         },
     },
+
     "02 Basic Hydrology": {
         "page_id": "020000_en",
         "sub": {
@@ -84,193 +85,226 @@ CATALOG = {
                 "page_id": "020400_en",
                 "sub": {}
             },
-            "05 Hydrological Measurement & Instrumentation": {
-                "page_id": "020500_en",
-                "sub": {}
-            },
         },
     },
-    "03 Soil Physics": {
+
+    "03 Basic Hydrogeology": {
         "page_id": "030000_en",
         "sub": {
-            "01 Soil Properties": {
+            "01 Hydrogeological Concepts & Aquifer Types": {
                 "page_id": "030100_en",
                 "sub": {}
             },
-            "02 Soil Water Retention": {
+            "02 Hydrogeological Properties": {
                 "page_id": "030200_en",
                 "sub": {}
             },
-            "03 Unsaturated Flow": {
+            "03 Steady Groundwater Flow": {
                 "page_id": "030300_en",
                 "sub": {}
             },
-            "04 Hydraulic Conductivity Functions": {
+            "04 Transient Groundwater Flow": {
                 "page_id": "030400_en",
                 "sub": {}
             },
-            "05 Infiltration (Horton, Green–Ampt, Philip)": {
+            "05 Flow to Wells": {
                 "page_id": "030500_en",
                 "sub": {}
             },
+            "06 Regional Groundwater Flow Systems": {
+                "page_id": "030600_en",
+                "sub": {}
+            },
+            "07 Conceptual Hydrogeological Models": {
+                "page_id": "030700_en",
+                "sub": {}
+            },
+            "08 Conservative Solute Transport Processes": {
+                "page_id": "030800_en",
+                "sub": {}
+            },
         },
     },
-    "04 Basic Hydrogeology": {
+
+    "04 Vadose Zone Physics": {
         "page_id": "040000_en",
         "sub": {
-            "01 Hydrogeological Concepts & Aquifer Types": {
+            "01 Soil Properties": {
                 "page_id": "040100_en",
                 "sub": {}
             },
-            "02 Hydrogeological Properties": {
+            "02 Soil Water Retention": {
                 "page_id": "040200_en",
                 "sub": {}
             },
-            "03 Steady Groundwater Flow": {
+            "03 Unsaturated Flow": {
                 "page_id": "040300_en",
                 "sub": {}
             },
-            "04 Transient Groundwater Flow": {
+            "04 Hydraulic Conductivity Functions": {
                 "page_id": "040400_en",
                 "sub": {}
             },
-            "05 Flow to Wells": {
+            "05 Infiltration": {
                 "page_id": "040500_en",
                 "sub": {}
             },
-            "06 Regional Groundwater Flow Systems": {
-                "page_id": "040600_en",
-                "sub": {}
-            },
-            "07 Recharge & Discharge Areas (conceptual)": {
-                "page_id": "040700_en",
-                "sub": {}
-            },
-            "08 Conceptual Hydrogeological Models": {
-                "page_id": "040800_en",
-                "sub": {}
-            },
         },
     },
-    "05 Applied Hydrogeology": {
+
+    "05 Hydrogeochemistry": {
         "page_id": "050000_en",
         "sub": {
-            "01 Groundwater Management": {
+            "01 Aqueous Chemistry and Speciation": {
                 "page_id": "050100_en",
                 "sub": {}
             },
-            "02 Aquifer Testing": {
+            "02 Mineral Reactions and Saturation Processes": {
                 "page_id": "050200_en",
                 "sub": {}
             },
-            "03 Groundwater in Water Supply (well fields, collector wells, superposition)": {
+            "03 Sorption and Surface Processes": {
                 "page_id": "050300_en",
                 "sub": {}
             },
-            "04 Karst Hydrogeology": {
+            "04 Redox Chemistry and Biogeochemical Processes": {
                 "page_id": "050400_en",
                 "sub": {}
             },
-            "05 Freshwater–Saltwater Interaction": {
+            "05 Reactive Solute Transport": {
                 "page_id": "050500_en",
                 "sub": {}
             },
-            "06 Conservative Solute Transport": {
+            "06 Isotope Hydrology": {
                 "page_id": "050600_en",
-                "sub": {}
-            },
-            "07 Reactive Transport": {
-                "page_id": "050700_en",
-                "sub": {}
-            },
-            "08 Groundwater Contamination & Remediation": {
-                "page_id": "050800_en",
-                "sub": {}
-            },
-            "09 Managed Aquifer Recharge (MAR)": {
-                "page_id": "050900_en",
-                "sub": {}
-            },
-            "10 Groundwater–Surface Water Ecology & Dependent Ecosystems": {
-                "page_id": "051000_en",
-                "sub": {}
-            },
-            "11 Climate Change Impacts & Groundwater Sustainability": {
-                "page_id": "051100_en",
-                "sub": {}
-            },
-            "12 Groundwater Chemistry & Geochemistry": {
-                "page_id": "051200_en",
-                "sub": {}
-            },
-            "13 Environmental Tracers & Isotope Hydrogeology": {
-                "page_id": "051300_en",
-                "sub": {}
-            },
-            "14 Groundwater Heat Flow & Geothermal Systems": {
-                "page_id": "051400_en",
-                "sub": {}
-            },
-            "15 Field & Subsurface Investigation Methods (drilling, logging, geophysics)": {
-                "page_id": "051500_en",
                 "sub": {}
             },
         },
     },
-    "06 Groundwater Modelling": {
+
+    "06 Experimental Techniques and Methods": {
         "page_id": "060000_en",
         "sub": {
-            "01 Conceptual Model Development": {
+            "01 Laboratory methods": {
                 "page_id": "060100_en",
                 "sub": {}
             },
-            "02 Numerical Schemes (FD, FE, FV)": {
+            "02 Hydrological Field Investigations": {
                 "page_id": "060200_en",
                 "sub": {}
             },
-            "03 Flow Modelling": {
+            "03 Hydrogeological Field Investigations": {
                 "page_id": "060300_en",
                 "sub": {}
             },
-            "04 Transport Modelling": {
+            "04 Aquifer Testing": {
                 "page_id": "060400_en",
                 "sub": {}
             },
-            "05 Coupled Models (density, heat, CFP)": {
-                "page_id": "060500_en",
+        },
+    },
+
+    "07 Applied Hydrogeology": {
+        "page_id": "070000_en",
+        "sub": {
+            "01 Groundwater Management": {
+                "page_id": "070100_en",
                 "sub": {}
             },
-            "06 Parameter Estimation & Calibration": {
-                "page_id": "060600_en",
+            "02 Groundwater–Surface Water Ecology & Dependent Ecosystems": {
+                "page_id": "070200_en",
                 "sub": {}
             },
-            "07 Sensitivity & Uncertainty Analysis": {
-                "page_id": "060700_en",
+            "03 Groundwater in Water Supply": {
+                "page_id": "070300_en",
                 "sub": {}
             },
-            "08 Model Validation & Verification": {
-                "page_id": "060800_en",
+            "04 Climate Change Impacts & Groundwater Sustainability": {
+                "page_id": "070400_en",
                 "sub": {}
             },
-            "09 MODFLOW Packages & Tools": {
-                "page_id": "060900_en",
+            "05 Fractured and Bedrock Hydrogeology": {
+                "page_id": "070500_en",
                 "sub": {}
             },
-            "10 Data-Driven & Machine Learning Approaches": {
-                "page_id": "061000_en",
+            "06 Karst Hydrogeology": {
+                "page_id": "070600_en",
                 "sub": {}
             },
-            "11 Scenario Analysis & Decision-Support Modelling": {
-                "page_id": "061100_en",
+            "07 Freshwater–Saltwater Interaction": {
+                "page_id": "070700_en",
                 "sub": {}
             },
-            "12 Geostatistics & Spatial Variability in Modelling": {
-                "page_id": "061200_en",
+            "08 Managed Aquifer Recharge (MAR)": {
+                "page_id": "070800_en",
+                "sub": {}
+            },
+            "09 Groundwater Contamination & Remediation": {
+                "page_id": "070900_en",
+                "sub": {}
+            },
+            "10 Geothermal Energy": {
+                "page_id": "071000_en",
+                "sub": {}
+            },
+        },
+    },
+
+    "08 Groundwater Modeling": {
+        "page_id": "080000_en",
+        "sub": {
+            "01 Conceptual Model Development": {
+                "page_id": "080100_en",
+                "sub": {}
+            },
+            "02 Numerical Schemes": {
+                "page_id": "080200_en",
+                "sub": {}
+            },
+            "03 Flow Modelling": {
+                "page_id": "080300_en",
+                "sub": {}
+            },
+            "04 Transport Modelling": {
+                "page_id": "080400_en",
+                "sub": {}
+            },
+            "05 Vadose Zone Modelling": {
+                "page_id": "080500_en",
+                "sub": {}
+            },
+            "06 Coupled Models": {
+                "page_id": "080600_en",
+                "sub": {}
+            },
+            "07 Parameter Estimation & Calibration": {
+                "page_id": "080700_en",
+                "sub": {}
+            },
+            "08 Sensitivity & Uncertainty Analysis": {
+                "page_id": "080800_en",
+                "sub": {}
+            },
+            "09 Model Evaluation & Verification": {
+                "page_id": "080900_en",
+                "sub": {}
+            },
+            "10 MODFLOW Concepts, Packages & Tools": {
+                "page_id": "081000_en",
+                "sub": {}
+            },
+            "11 Data-Driven & Machine Learning Approaches": {
+                "page_id": "081100_en",
+                "sub": {}
+            },
+            "12 Scenario Analysis & Decision-Support Modelling": {
+                "page_id": "081200_en",
                 "sub": {}
             },
         },
     },
 }
+
 
 
 NEW_CAT_OPTION = "➕ Define new category"
