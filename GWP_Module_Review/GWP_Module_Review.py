@@ -5,6 +5,7 @@ import io
 import zipfile
 import hashlib
 import mimetypes
+import csv
 from pathlib import Path
 from io import BytesIO
 from xml.sax.saxutils import escape
@@ -32,9 +33,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 APP_TITLE = "Module Review"
 PROJECT_TITLE = "The Groundwater Project"
 REVIEW_STANDARD = "GWP Educational Module Review"
-REVIEW_STANDARD_VERSION = "1.2"
-YAML_SCHEMA_VERSION = "1.2"
-APP_BUILD = "1.2.1"
+REVIEW_STANDARD_VERSION = "1.3"
+YAML_SCHEMA_VERSION = "1.3"
+APP_BUILD = "1.3.0"
 
 LANGUAGE_OPTIONS = [
     "English",
@@ -302,7 +303,7 @@ def default_state():
             st.session_state[nkey] = ""
 
     for i in range(int(st.session_state.get("glossary_count", 1))):
-        for field in ["source", "current", "preferred", "note"]:
+        for field in ["source", "note"]:
             key = f"glossary_{field}_{i}"
             if key not in st.session_state:
                 st.session_state[key] = ""
@@ -361,8 +362,6 @@ def collect_review_data(status: str, uploaded_files=None) -> dict:
         for i in range(int(st.session_state.get("glossary_count", 1))):
             entry = {
                 "source_term": (st.session_state.get(f"glossary_source_{i}") or "").strip(),
-                "current_translation": (st.session_state.get(f"glossary_current_{i}") or "").strip(),
-                "preferred_translation": (st.session_state.get(f"glossary_preferred_{i}") or "").strip(),
                 "note": (st.session_state.get(f"glossary_note_{i}") or "").strip(),
             }
             if any(entry.values()):
@@ -424,6 +423,39 @@ def build_yaml_text(status: str, uploaded_files=None) -> str:
     )
 
 
+def glossary_entries_from_data(data: dict) -> list[dict]:
+    """Return non-empty glossary entries in the current two-field format."""
+    review = data.get("review") if isinstance(data, dict) else {}
+    review = review if isinstance(review, dict) else {}
+    language_review = review.get("language_review")
+    language_review = language_review if isinstance(language_review, dict) else {}
+
+    entries = []
+    for item in language_review.get("glossary_suggestions") or []:
+        if not isinstance(item, dict):
+            continue
+        source_term = str(item.get("source_term") or "").strip()
+        note = str(item.get("note") or "").strip()
+        if source_term or note:
+            entries.append({"source_term": source_term, "note": note})
+    return entries
+
+
+def glossary_to_csv_bytes(data: dict) -> bytes:
+    """Create an Excel-friendly UTF-8 CSV with source term and note only."""
+    entries = glossary_entries_from_data(data)
+    if not entries:
+        return b""
+
+    output = io.StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=["source_term", "note"])
+    writer.writeheader()
+    writer.writerows(entries)
+
+    # UTF-8 BOM improves direct opening of multilingual glossary files in Excel.
+    return ("\ufeff" + output.getvalue()).encode("utf-8")
+
+
 def prefill_from_yaml(data: dict):
     if not data:
         return
@@ -480,8 +512,14 @@ def prefill_from_yaml(data: dict):
         st.session_state[f"note_lang_{c['id']}"] = str(item.get("note") or "")
 
     # Clear any existing glossary widget state before restoring the imported list.
+    # Legacy v1.1/v1.2 current/preferred translation widget keys are also cleared.
     for key in list(st.session_state.keys()):
-        if key.startswith("glossary_source_") or key.startswith("glossary_current_") or key.startswith("glossary_preferred_") or key.startswith("glossary_note_"):
+        if (
+            key.startswith("glossary_source_")
+            or key.startswith("glossary_current_")
+            or key.startswith("glossary_preferred_")
+            or key.startswith("glossary_note_")
+        ):
             st.session_state.pop(key, None)
 
     glossary = [x for x in (language_review.get("glossary_suggestions") or []) if isinstance(x, dict)]
@@ -489,9 +527,15 @@ def prefill_from_yaml(data: dict):
     for i in range(st.session_state["glossary_count"]):
         item = glossary[i] if i < len(glossary) else {}
         st.session_state[f"glossary_source_{i}"] = str(item.get("source_term") or "")
-        st.session_state[f"glossary_current_{i}"] = str(item.get("current_translation") or "")
-        st.session_state[f"glossary_preferred_{i}"] = str(item.get("preferred_translation") or "")
-        st.session_state[f"glossary_note_{i}"] = str(item.get("note") or "")
+
+        # Backward compatibility with v1.1/v1.2: ignore the former current translation,
+        # but preserve a former preferred translation by folding it into the free note.
+        legacy_preferred = str(item.get("preferred_translation") or "").strip()
+        note = str(item.get("note") or "").strip()
+        if legacy_preferred:
+            legacy_line = f"Suggested translation: {legacy_preferred}"
+            note = f"{legacy_line}; {note}" if note else legacy_line
+        st.session_state[f"glossary_note_{i}"] = note
 
     st.session_state["preview_requested"] = False
     st.session_state["ready_for_final"] = False
@@ -779,18 +823,14 @@ def yaml_to_pdf_bytes(yaml_text: str, uploaded_files=None) -> bytes:
         if glossary:
             glossary_rows = [[
                 P("Source term", small_style, True),
-                P("Current translation", small_style, True),
-                P("Preferred translation", small_style, True),
-                P("Note", small_style, True),
+                P("Note / suggested translations", small_style, True),
             ]]
             for item in glossary:
                 glossary_rows.append([
                     P(item.get("source_term"), small_style),
-                    P(item.get("current_translation"), small_style),
-                    P(item.get("preferred_translation"), small_style),
                     P(item.get("note"), small_style),
                 ])
-            glossary_table = Table(glossary_rows, colWidths=[38 * mm, 40 * mm, 42 * mm, 40 * mm], repeatRows=1)
+            glossary_table = Table(glossary_rows, colWidths=[48 * mm, 112 * mm], repeatRows=1)
             glossary_table.setStyle(
                 TableStyle(
                     [
@@ -936,7 +976,7 @@ st.subheader(
     "The Groundwater Project ➤ Compact quality and language review for interactive educational modules",
     divider="rainbow",
 )
-st.caption(f"App build {APP_BUILD} · module/app language selector below Review scope · optional language review for non-English modules")
+#st.caption(f"App build {APP_BUILD} · compact optional language review · two-field glossary + CSV export")
 st.markdown(
     """
 Use this form to review an educational module with a compact set of quality standards. For multilingual modules, select the **module/app language** in the review information; a short optional language-review section will then be available for non-English versions.
@@ -1016,7 +1056,7 @@ if include_language_review:
     st.info(
         f"You selected **{selected_language}**. An optional language-review section is available at the end of the form. "
         "It asks only about meaning/language appropriateness, technical terminology, and fluency/readability. "
-        "You can also suggest preferred translations for specific terms to help develop the project glossary."
+        "You can also record source terms with notes or alternative translations to help develop the project glossary."
     )
 
 # ---------- Dynamic numbering for the remaining sections ----------
@@ -1121,26 +1161,32 @@ if include_language_review:
     with st.expander("📘 Terminology / glossary suggestions (optional)", expanded=False):
         st.caption(
             "Record terminology that should be standardized for future translations. "
-            "Add the source term, the translation currently used, and the preferred translation."
+            "Use the note for a recommended translation, alternative translations, context, or other terminology guidance."
         )
+
+        header_source, header_note = st.columns([1.2, 3.0])
+        with header_source:
+            st.markdown("**Source term**")
+        with header_note:
+            st.markdown("**Note / suggested translations**")
 
         glossary_count = int(st.session_state.get("glossary_count", 1))
         for i in range(glossary_count):
-            st.markdown(f"**Term {i + 1}**")
-            g1, g2 = st.columns(2)
+            g1, g2 = st.columns([1.2, 3.0])
             with g1:
-                st.text_input("Source term", key=f"glossary_source_{i}")
+                st.text_input(
+                    f"Source term {i + 1}",
+                    key=f"glossary_source_{i}",
+                    label_visibility="collapsed",
+                    placeholder="Source term",
+                )
             with g2:
-                st.text_input("Current translation", key=f"glossary_current_{i}")
-
-            g3, g4 = st.columns(2)
-            with g3:
-                st.text_input("Preferred translation", key=f"glossary_preferred_{i}")
-            with g4:
-                st.text_input("Short note (optional)", key=f"glossary_note_{i}")
-
-            if i < glossary_count - 1:
-                st.divider()
+                st.text_input(
+                    f"Note / suggested translations {i + 1}",
+                    key=f"glossary_note_{i}",
+                    label_visibility="collapsed",
+                    placeholder="Recommended or alternative translation(s), context, notes…",
+                )
 
         add_col, remove_col = st.columns(2)
         with add_col:
@@ -1148,7 +1194,7 @@ if include_language_review:
                 if st.session_state["glossary_count"] < 50:
                     st.session_state["glossary_count"] += 1
                     new_i = st.session_state["glossary_count"] - 1
-                    for field in ["source", "current", "preferred", "note"]:
+                    for field in ["source", "note"]:
                         st.session_state.setdefault(f"glossary_{field}_{new_i}", "")
                     st.rerun()
         with remove_col:
@@ -1160,7 +1206,7 @@ if include_language_review:
                 if st.session_state["glossary_count"] > 1:
                     remove_i = st.session_state["glossary_count"] - 1
                     st.session_state["glossary_count"] -= 1
-                    for field in ["source", "current", "preferred", "note"]:
+                    for field in ["source", "note"]:
                         st.session_state.pop(f"glossary_{field}_{remove_i}", None)
                     st.rerun()
 
@@ -1254,8 +1300,6 @@ if st.session_state.get("preview_requested"):
         for i in range(int(st.session_state.get("glossary_count", 1))):
             entry = {
                 "source": (st.session_state.get(f"glossary_source_{i}") or "").strip(),
-                "current": (st.session_state.get(f"glossary_current_{i}") or "").strip(),
-                "preferred": (st.session_state.get(f"glossary_preferred_{i}") or "").strip(),
                 "note": (st.session_state.get(f"glossary_note_{i}") or "").strip(),
             }
             if any(entry.values()):
@@ -1265,10 +1309,8 @@ if st.session_state.get("preview_requested"):
             st.markdown("##### Glossary suggestions")
             for item in glossary_preview:
                 source = item["source"] or "—"
-                current = item["current"] or "—"
-                preferred = item["preferred"] or "—"
-                note = f" — {item['note']}" if item["note"] else ""
-                st.markdown(f"- **{source}** → current: *{current}* → preferred: **{preferred}**{note}")
+                note = item["note"] or "—"
+                st.markdown(f"- **{source}** — {note}")
 
     comments = (st.session_state.get("general_comments") or "").strip()
     if comments:
@@ -1299,6 +1341,11 @@ if st.session_state.get("ready_for_final"):
     yaml_filename = f"{base_name}.yaml"
     pdf_filename = f"{base_name}.pdf"
 
+    final_data = yaml.safe_load(final_yaml) or {}
+    glossary_csv = glossary_to_csv_bytes(final_data)
+    language_slug = slugify((final_data.get("module") or {}).get("language") or "language")
+    glossary_csv_filename = f"{base_name}_glossary_{language_slug}.csv"
+
     try:
         pdf_bytes = yaml_to_pdf_bytes(final_yaml, uploaded_files=uploaded_attachments)
     except Exception as exc:
@@ -1321,11 +1368,23 @@ if st.session_state.get("ready_for_final"):
         use_container_width=True,
     )
 
+    if glossary_csv:
+        st.download_button(
+            f"⬇️ Download glossary CSV ({glossary_csv_filename})",
+            data=glossary_csv,
+            file_name=glossary_csv_filename,
+            mime="text/csv",
+            use_container_width=True,
+            help="Contains the glossary source term and note columns in UTF-8 format.",
+        )
+
     if uploaded_attachments:
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr(yaml_filename, final_yaml)
             zf.writestr(pdf_filename, pdf_bytes)
+            if glossary_csv:
+                zf.writestr(glossary_csv_filename, glossary_csv)
             used_names = set()
             for idx, f in enumerate(uploaded_attachments, start=1):
                 original = Path(f.name).name
