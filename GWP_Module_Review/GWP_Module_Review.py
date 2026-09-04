@@ -36,7 +36,7 @@ PROJECT_TITLE = "The Groundwater Project"
 REVIEW_STANDARD = "GWP Educational Module Review"
 REVIEW_STANDARD_VERSION = "1.3"
 YAML_SCHEMA_VERSION = "1.3"
-APP_BUILD = "1.4.2"
+APP_BUILD = "1.4.3"
 
 LANGUAGE_OPTIONS = [
     "English",
@@ -270,6 +270,7 @@ def xml_text(value) -> str:
 def default_state():
     defaults = {
         "start_mode": "new",
+        "clear_restart_pending": False,
         "preview_requested": False,
         "ready_for_final": False,
         "module_title": "",
@@ -312,11 +313,9 @@ def default_state():
 
 
 def reset_review_fields():
-    preserve = {"start_mode"}
-    keys = list(st.session_state.keys())
-    for key in keys:
-        if key not in preserve:
-            del st.session_state[key]
+    # Clear the complete review state, including any uploaded resume YAML.
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
     default_state()
 
 
@@ -975,10 +974,9 @@ default_state()
 
 st.title("Module :green[Review] ✅")
 st.subheader(
-    "The Groundwater Project ➤ Compact quality and language review for interactive educational modules ",
+    "The Groundwater Project ➤ Compact quality and language review for interactive educational modules",
     divider="rainbow",
 )
-st.caption(f"App build {APP_BUILD} · preview toggle · optional YAML progress save · PDF-first completion")
 st.markdown(
     """
 Use this form to review an educational module using a compact set of quality standards. For multilingual modules, select the **module/app language** in the review information; an optional language-review section will then be available for non-English versions.
@@ -993,27 +991,16 @@ st.info(
     "The app can optionally prepare a pre-populated email for you, but the PDF must still be attached manually."
 )
 
-# ---------- Start / resume ----------
-col_resume, col_new = st.columns(2)
-with col_resume:
-    if st.button("⬆️ Resume from YAML", use_container_width=True):
-        st.session_state["start_mode"] = "upload"
-        st.session_state.pop("last_import_sig", None)
-        st.session_state["preview_requested"] = False
-        st.session_state["ready_for_final"] = False
-        st.rerun()
-with col_new:
-    if st.button("🆕 Start new review", use_container_width=True):
-        reset_review_fields()
-        st.session_state["start_mode"] = "new"
-        st.rerun()
-
-if st.session_state.get("start_mode") == "upload":
+# ---------- Resume from YAML (optional) ----------
+with st.expander("⬆️ Continue a previous review from YAML (optional)", expanded=False):
+    st.caption(
+        "If you previously saved your progress as a YAML file, upload it here to restore the review and continue working. "
+        "Attachments are not stored inside the YAML and must be uploaded again if needed."
+    )
     uploaded_yaml = st.file_uploader(
-        "Upload a review YAML to continue working",
+        "Upload a review YAML",
         type=["yaml", "yml"],
         key="resume_yaml_upload",
-        help="Attachments themselves are not stored in YAML and must be uploaded again if needed.",
     )
     if uploaded_yaml is not None:
         sig = compute_upload_signature(uploaded_yaml)
@@ -1032,6 +1019,26 @@ if imported_meta:
     st.info(
         f"The imported YAML references {len(imported_meta)} attachment(s). Files are not embedded in YAML, so re-upload them below if they should be included in the final package."
     )
+
+# ---------- Clear / restart (two-stage safeguard) ----------
+if not st.session_state.get("clear_restart_pending", False):
+    if st.button("🗑️ Clear the form and restart", use_container_width=True):
+        st.session_state["clear_restart_pending"] = True
+        st.rerun()
+else:
+    st.warning(
+        "This will clear all information currently entered in the form, including ratings, comments, glossary entries, "
+        "and uploaded files. This action cannot be undone unless you have saved a YAML copy."
+    )
+    confirm_col, cancel_col = st.columns(2)
+    with confirm_col:
+        if st.button("⚠️ Yes, clear the form", use_container_width=True):
+            reset_review_fields()
+            st.rerun()
+    with cancel_col:
+        if st.button("Cancel", use_container_width=True):
+            st.session_state["clear_restart_pending"] = False
+            st.rerun()
 
 st.divider()
 
@@ -1236,8 +1243,8 @@ st.toggle(
 
 st.markdown(
     "**Save your progress (optional):** If you want to stop and continue later, "
-    "you can download the current review as a YAML file. Upload that YAML file at "
-    "the top of the app to resume the review later."
+    "download the current review as a YAML file. To continue, use the "
+    "**Continue a previous review from YAML** expander above Section 1 and upload the saved file."
 )
 
 with st.expander("💾 Save progress as YAML (optional)", expanded=False):
@@ -1269,13 +1276,13 @@ if not review_ready:
 if issues_now:
     st.caption(
         "The PDF can be generated once all required information and ratings are complete. "
-        "You can still preview the review or save your progress as YAML."
+        "You can click the button below at any time to see what is still missing."
     )
 else:
     st.success("The required review information is complete. The PDF report is ready to generate.")
 
-# Keep the final action visually inactive until the required review information is complete.
-# The primary button is styled green once enabled.
+# The button remains clickable while incomplete so users can request a precise list of missing fields.
+# It uses the normal grey secondary style until the review is ready, then turns green as a primary action.
 st.markdown(
     """
     <style>
@@ -1291,11 +1298,6 @@ st.markdown(
         border-color: #256628 !important;
         color: white !important;
     }
-    div[data-testid="stButton"] button:disabled {
-        background-color: #e0e0e0 !important;
-        border-color: #bdbdbd !important;
-        color: #757575 !important;
-    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -1305,21 +1307,20 @@ complete_clicked = st.button(
     "✅ Complete review and generate PDF",
     use_container_width=True,
     type="primary" if review_ready else "secondary",
-    disabled=not review_ready,
     key="generate_pdf_button",
     help=(
         "Generate the final PDF review report."
         if review_ready
-        else "Complete all required information and ratings to enable PDF generation."
+        else "Click to see which required information is still missing."
     ),
 )
 
 if complete_clicked:
-    # Re-check immediately before finalization in case state changed during the rerun.
+    # Re-check immediately before finalization and report missing items when incomplete.
     issues = validation_issues()
     if issues:
         st.session_state["ready_for_final"] = False
-        st.error(
+        st.warning(
             "Please complete the following before generating the final PDF:\n\n"
             + "\n".join(f"- {x}" for x in issues)
         )
