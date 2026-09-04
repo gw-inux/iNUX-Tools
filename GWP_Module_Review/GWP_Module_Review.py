@@ -6,6 +6,7 @@ import zipfile
 import hashlib
 import mimetypes
 import csv
+from urllib.parse import quote
 from pathlib import Path
 from io import BytesIO
 from xml.sax.saxutils import escape
@@ -35,7 +36,7 @@ PROJECT_TITLE = "The Groundwater Project"
 REVIEW_STANDARD = "GWP Educational Module Review"
 REVIEW_STANDARD_VERSION = "1.3"
 YAML_SCHEMA_VERSION = "1.3"
-APP_BUILD = "1.3.0"
+APP_BUILD = "1.4.2"
 
 LANGUAGE_OPTIONS = [
     "English",
@@ -208,6 +209,7 @@ LANGUAGE_CRITERIA = [
 ]
 
 ATTACHMENT_TYPES = ["docx", "pdf", "txt", "md", "png", "jpg", "jpeg"]
+REVIEW_COORDINATOR_EMAIL = "treimann@gw-project.org"
 
 
 # -------------------------------------------------
@@ -973,16 +975,22 @@ default_state()
 
 st.title("Module :green[Review] ✅")
 st.subheader(
-    "The Groundwater Project ➤ Compact quality and language review for interactive educational modules",
+    "The Groundwater Project ➤ Compact quality and language review for interactive educational modules ",
     divider="rainbow",
 )
-#st.caption(f"App build {APP_BUILD} · compact optional language review · two-field glossary + CSV export")
+st.caption(f"App build {APP_BUILD} · preview toggle · optional YAML progress save · PDF-first completion")
 st.markdown(
     """
-Use this form to review an educational module with a compact set of quality standards. For multilingual modules, select the **module/app language** in the review information; a short optional language-review section will then be available for non-English versions.
+Use this form to review an educational module using a compact set of quality standards. For multilingual modules, select the **module/app language** in the review information; an optional language-review section will then be available for non-English versions.
 
-Detailed feedback can be added in the common comments field or as an annotated attachment. You can download the current state as **YAML at any time**, resume it later, and generate a formatted PDF plus an optional ZIP package with attachments.
+Detailed feedback can be entered in the general comments field or provided as an annotated attachment. You can also save the current state of your review as a **YAML file** and resume it later.
 """
+)
+st.info(
+    "**Important:** This form does **not automatically submit or send your review**. "
+    "After completing the review, the app generates a formatted **PDF review report**. "
+    "Please download the PDF and send it by email to the Groundwater Project review coordinator. "
+    "The app can optionally prepare a pre-populated email for you, but the PDF must still be attached manually."
 )
 
 # ---------- Start / resume ----------
@@ -1210,29 +1218,113 @@ if include_language_review:
                         st.session_state.pop(f"glossary_{field}_{remove_i}", None)
                     st.rerun()
 
-# ---------- Intermediate YAML: always available ----------
-st.header(f"{ui_section}️⃣ Save progress / preview")
+# ---------- Save progress / optional preview / complete review ----------
+st.header(f"{ui_section}️⃣ Save progress and complete review")
 ui_section += 1
 draft_yaml = build_yaml_text(status="draft", uploaded_files=uploaded_attachments)
 module_slug = slugify(st.session_state.get("module_title") or "module")
 reviewer_slug = slugify(st.session_state.get("reviewer_name") or "reviewer")
 draft_filename = f"module-review_{module_slug}_{reviewer_slug}_draft.yaml"
 
-st.download_button(
-    "💾 Download intermediate YAML",
-    data=draft_yaml,
-    file_name=draft_filename,
-    mime="text/yaml",
-    use_container_width=True,
-    help="Use this at any time to save the current review state. Re-upload it later with 'Resume from YAML'.",
+# Preview is the first control in this section. It can be used at any time,
+# including while the review is still incomplete.
+st.toggle(
+    "🔍 Preview review",
+    key="preview_requested",
+    help="Show or hide a preview of the current review below.",
 )
 
-with st.expander("Show current YAML", expanded=False):
-    st.code(draft_yaml, language="yaml")
+st.markdown(
+    "**Save your progress (optional):** If you want to stop and continue later, "
+    "you can download the current review as a YAML file. Upload that YAML file at "
+    "the top of the app to resume the review later."
+)
 
-if st.button("🔍 Preview final review", use_container_width=True):
-    st.session_state["preview_requested"] = True
+with st.expander("💾 Save progress as YAML (optional)", expanded=False):
+    st.download_button(
+        "⬇️ Download intermediate YAML",
+        data=draft_yaml,
+        file_name=draft_filename,
+        mime="text/yaml",
+        use_container_width=True,
+        help="Use this to save the current review state and resume it later.",
+    )
+    show_current_yaml = st.checkbox(
+        "Show current YAML",
+        value=False,
+        key="show_current_yaml",
+        help="Display the current YAML in the app.",
+    )
+    if show_current_yaml:
+        st.code(draft_yaml, language="yaml")
+
+issues_now = validation_issues()
+review_ready = not issues_now
+
+# If a previously completed review becomes incomplete after an edit,
+# hide the final-output section again until the required information is restored.
+if not review_ready:
     st.session_state["ready_for_final"] = False
+
+if issues_now:
+    st.caption(
+        "The PDF can be generated once all required information and ratings are complete. "
+        "You can still preview the review or save your progress as YAML."
+    )
+else:
+    st.success("The required review information is complete. The PDF report is ready to generate.")
+
+# Keep the final action visually inactive until the required review information is complete.
+# The primary button is styled green once enabled.
+st.markdown(
+    """
+    <style>
+    div[data-testid="stButton"] button[kind="primary"],
+    div[data-testid="stButton"] button[data-testid="stBaseButton-primary"] {
+        background-color: #2e7d32 !important;
+        border-color: #2e7d32 !important;
+        color: white !important;
+    }
+    div[data-testid="stButton"] button[kind="primary"]:hover,
+    div[data-testid="stButton"] button[data-testid="stBaseButton-primary"]:hover {
+        background-color: #256628 !important;
+        border-color: #256628 !important;
+        color: white !important;
+    }
+    div[data-testid="stButton"] button:disabled {
+        background-color: #e0e0e0 !important;
+        border-color: #bdbdbd !important;
+        color: #757575 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+complete_clicked = st.button(
+    "✅ Complete review and generate PDF",
+    use_container_width=True,
+    type="primary" if review_ready else "secondary",
+    disabled=not review_ready,
+    key="generate_pdf_button",
+    help=(
+        "Generate the final PDF review report."
+        if review_ready
+        else "Complete all required information and ratings to enable PDF generation."
+    ),
+)
+
+if complete_clicked:
+    # Re-check immediately before finalization in case state changed during the rerun.
+    issues = validation_issues()
+    if issues:
+        st.session_state["ready_for_final"] = False
+        st.error(
+            "Please complete the following before generating the final PDF:\n\n"
+            + "\n".join(f"- {x}" for x in issues)
+        )
+    else:
+        st.session_state["ready_for_final"] = True
 
 if st.session_state.get("preview_requested"):
     st.header(f"{ui_section}️⃣ Preview")
@@ -1240,7 +1332,7 @@ if st.session_state.get("preview_requested"):
     issues = validation_issues()
     if issues:
         st.warning(
-            "The review can still be saved as a draft, but the following should normally be completed before final generation:\n\n"
+            "The review can still be saved as a draft, but the following should normally be completed before final PDF generation:\n\n"
             + "\n".join(f"- {x}" for x in issues)
         )
 
@@ -1323,17 +1415,11 @@ if st.session_state.get("preview_requested"):
             st.markdown(f"- {f.name}")
 
     if not issues:
-        st.success("The required final-review fields are complete.")
-
-    if st.button("✅ Looks good – generate final files", use_container_width=True):
-        if issues:
-            st.error("Please complete the missing final-review fields shown above before generating the final review package.")
-        else:
-            st.session_state["ready_for_final"] = True
+        st.caption("Preview complete. Use **Complete review and generate PDF** above when you are ready.")
 
 # ---------- Final files ----------
 if st.session_state.get("ready_for_final"):
-    st.header(f"{ui_section + 1}️⃣ Final files")
+    st.header(f"{ui_section + 1}️⃣ Review report")
 
     final_yaml = build_yaml_text(status="final", uploaded_files=uploaded_attachments)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1353,54 +1439,95 @@ if st.session_state.get("ready_for_final"):
         st.exception(exc)
         st.stop()
 
-    st.download_button(
-        f"⬇️ Download final YAML ({yaml_filename})",
-        data=final_yaml,
-        file_name=yaml_filename,
-        mime="text/yaml",
-        use_container_width=True,
+    st.success(
+        "**Your review report is ready.** The review has not been submitted automatically. "
+        "Please download the PDF below and send it by email to the Groundwater Project review coordinator."
     )
+
     st.download_button(
-        f"⬇️ Download PDF ({pdf_filename})",
+        f"⬇️ Download PDF review ({pdf_filename})",
         data=pdf_bytes,
         file_name=pdf_filename,
         mime="application/pdf",
         use_container_width=True,
+        type="primary",
     )
 
-    if glossary_csv:
-        st.download_button(
-            f"⬇️ Download glossary CSV ({glossary_csv_filename})",
-            data=glossary_csv,
-            file_name=glossary_csv_filename,
-            mime="text/csv",
-            use_container_width=True,
-            help="Contains the glossary source term and note columns in UTF-8 format.",
-        )
+    st.markdown("#### Send your review")
+    st.caption(
+        "After downloading the PDF, you can optionally open a pre-populated email. "
+        "For security reasons, the browser cannot attach the generated PDF automatically, so please attach the downloaded PDF before sending."
+    )
+
+    module_title_email = (st.session_state.get("module_title") or "Educational module").strip()
+    reviewer_name_email = (st.session_state.get("reviewer_name") or "").strip()
+    email_subject = f"GWP Module Review – {module_title_email}"
+    email_body = (
+        "Dear Thomas,\n\n"
+        f"Please find attached my review of the module \"{module_title_email}\".\n\n"
+        "Thank you and best regards,\n"
+        f"{reviewer_name_email}"
+    )
+    mailto_url = (
+        f"mailto:{REVIEW_COORDINATOR_EMAIL}"
+        f"?subject={quote(email_subject)}"
+        f"&body={quote(email_body)}"
+    )
+    st.link_button(
+        f"✉️ Prepare email to {REVIEW_COORDINATOR_EMAIL}",
+        mailto_url,
+        use_container_width=True,
+    )
 
     if uploaded_attachments:
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr(yaml_filename, final_yaml)
-            zf.writestr(pdf_filename, pdf_bytes)
-            if glossary_csv:
-                zf.writestr(glossary_csv_filename, glossary_csv)
-            used_names = set()
-            for idx, f in enumerate(uploaded_attachments, start=1):
-                original = Path(f.name).name
-                safe_name = original
-                if safe_name in used_names:
-                    safe_name = f"{idx}_{safe_name}"
-                used_names.add(safe_name)
-                zf.writestr(f"attachments/{safe_name}", f.getvalue())
-        zip_buffer.seek(0)
-
-        st.download_button(
-            f"⬇️ Download complete ZIP package ({base_name}.zip)",
-            data=zip_buffer.getvalue(),
-            file_name=f"{base_name}.zip",
-            mime="application/zip",
-            use_container_width=True,
+        st.info(
+            "You included additional review attachments. Please also attach those files to your email, "
+            "or use the optional ZIP package below to keep the review materials together."
         )
 
-    st.success("Final review files created.")
+    with st.expander("Additional downloads (optional)", expanded=False):
+        st.download_button(
+            f"⬇️ Download final YAML ({yaml_filename})",
+            data=final_yaml,
+            file_name=yaml_filename,
+            mime="text/yaml",
+            use_container_width=True,
+            help="Machine-readable copy of the final review; mainly useful for archiving or resuming structured processing.",
+        )
+
+        if glossary_csv:
+            st.download_button(
+                f"⬇️ Download glossary CSV ({glossary_csv_filename})",
+                data=glossary_csv,
+                file_name=glossary_csv_filename,
+                mime="text/csv",
+                use_container_width=True,
+                help="Contains the glossary source term and note columns in UTF-8 format.",
+            )
+
+        if uploaded_attachments:
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr(yaml_filename, final_yaml)
+                zf.writestr(pdf_filename, pdf_bytes)
+                if glossary_csv:
+                    zf.writestr(glossary_csv_filename, glossary_csv)
+                used_names = set()
+                for idx, f in enumerate(uploaded_attachments, start=1):
+                    original = Path(f.name).name
+                    safe_name = original
+                    if safe_name in used_names:
+                        safe_name = f"{idx}_{safe_name}"
+                    used_names.add(safe_name)
+                    zf.writestr(f"attachments/{safe_name}", f.getvalue())
+            zip_buffer.seek(0)
+
+            st.download_button(
+                f"⬇️ Download complete ZIP package ({base_name}.zip)",
+                data=zip_buffer.getvalue(),
+                file_name=f"{base_name}.zip",
+                mime="application/zip",
+                use_container_width=True,
+                help="Contains the PDF, YAML, glossary CSV (if present), and uploaded review attachments.",
+            )
+
